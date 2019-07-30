@@ -16,7 +16,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.Assert.*;
 
@@ -30,7 +32,7 @@ import static org.junit.Assert.*;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
-public class ActivitiStudyApplicationTests {
+public class QJLCTest {
 
     @Autowired
     private ProcessEngine processEngine;
@@ -55,12 +57,6 @@ public class ActivitiStudyApplicationTests {
         //创建用户
         createUser();
 
-        //创建组
-//        createGroup();
-
-        //将用户加入组
-//        addUserToGroup();
-
         //流程部署
         myDeploy();
 
@@ -68,7 +64,7 @@ public class ActivitiStudyApplicationTests {
         startProcess();
 
         //用户任务管理
-        userTaskManagement();
+        userTaskManagementV2();
     }
 
     /**
@@ -90,15 +86,6 @@ public class ActivitiStudyApplicationTests {
      */
     private void createUser(){
         // 创建并保存用户对象
-//        User user = identityService.newUser("henryyan");
-//        user.setFirstName("Henry");
-//        user.setLastName("Yan");
-//        user.setEmail("yanhonglei@gmail.com");
-//        identityService.saveUser(user);
-//        // 验证用户是否保存成功
-//        User userInDb = identityService.createUserQuery().userId("henryyan").singleResult();
-//        assertNotNull(userInDb);
-
         User user1 = identityService.newUser("小明");
         identityService.saveUser(user1);
 
@@ -199,14 +186,68 @@ public class ActivitiStudyApplicationTests {
      * 用户任务管理
      */
     private void userTaskManagement(){
+        //班长
         String userId = "班长";
-        //henryyan作为候选人的任务
-        List<Task> tasks = taskService.createTaskQuery().taskCandidateUser(userId).list();
-        System.out.println("test");
-//        assertNotNull(task);
-//        //签收任务
-//        taskService.claim(task.getId(), userId);
-//        //处理任务
-//        taskService.complete(task.getId());
+        Task task = taskService.createTaskQuery().taskCandidateUser(userId).singleResult();
+        //签收任务
+        taskService.claim(task.getId(), userId);
+        //处理任务
+        Map<String, Object> taskVariables = new HashMap<>();
+        taskVariables.put("bz_status","同意");
+        taskService.complete(task.getId(),taskVariables);
+
+        //班主任
+        userId = "班主任";
+        task = taskService.createTaskQuery().taskCandidateUser(userId).singleResult();
+        taskService.claim(task.getId(), userId);
+        taskVariables = new HashMap<>();
+        taskVariables.put("bzr_status","同意");
+        taskService.complete(task.getId(),taskVariables);
+
+        //教导主任
+        userId = "教导主任";
+        task = taskService.createTaskQuery().taskCandidateUser(userId).singleResult();
+        taskService.claim(task.getId(), userId);
+        taskVariables = new HashMap<>();
+        taskVariables.put("jdzr_status","同意");
+        taskService.complete(task.getId(),taskVariables);
+
+        //小明销假
+        userId = "小明";
+        task = taskService.createTaskQuery().taskCandidateUser(userId).singleResult();
+        taskService.claim(task.getId(), userId);
+        taskService.complete(task.getId());
+    }
+
+
+    /**
+     * 用户任务管理
+     */
+    private void userTaskManagementV2(){
+        //班长
+        String userId = "班长";
+        Task task = taskService.createTaskQuery().taskCandidateUser(userId).singleResult();
+        //签收任务
+        taskService.claim(task.getId(), userId);
+        //处理任务
+        Map<String, Object> taskVariables = new HashMap<>();
+        taskVariables.put("bz_status","同意且紧急");
+        taskService.complete(task.getId(),taskVariables);
+
+        //教导主任
+        userId = "教导主任";
+        task = taskService.createTaskQuery().taskCandidateUser(userId).singleResult();
+        taskService.claim(task.getId(), userId);
+        taskVariables = new HashMap<>();
+        taskVariables.put("jdzr_status","拒绝");
+        taskService.complete(task.getId(),taskVariables);
+
+        //小明取消申请
+        userId = "小明";
+        task = taskService.createTaskQuery().taskCandidateUser(userId).singleResult();
+        taskService.claim(task.getId(), userId);
+        taskVariables = new HashMap<>();
+        taskVariables.put("xm_status","撤销申请");
+        taskService.complete(task.getId(),taskVariables);
     }
 }

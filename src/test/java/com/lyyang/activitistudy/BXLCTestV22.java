@@ -190,7 +190,7 @@ public class BXLCTestV22 {
 
         //查询当前所有tasks
         currTasks = taskService.createTaskQuery().processInstanceId(processInstance.getId()).list();
-        
+
         //审批人3
         userId = "审批人3";
         task = taskService.createTaskQuery().taskCandidateUser(userId).singleResult();

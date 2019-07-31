@@ -9,8 +9,8 @@
     <endEvent id="_14" name="EndEvent"/>
     <userTask activiti:candidateUsers="审批人3" activiti:exclusive="true" id="_15" name="审批人3"/>
     <sequenceFlow id="_17" sourceRef="_15" targetRef="_14"/>
-    <parallelGateway gatewayDirection="Unspecified" id="_18" name="ParallelGateway"/>
-    <parallelGateway gatewayDirection="Unspecified" id="_19" name="ParallelGateway"/>
+    <parallelGateway gatewayDirection="Unspecified" id="_18" name="fork"/>
+    <parallelGateway gatewayDirection="Unspecified" id="_19" name="join"/>
     <sequenceFlow id="_20" sourceRef="_4" targetRef="_18"/>
     <sequenceFlow id="_21" sourceRef="_18" targetRef="_7"/>
     <sequenceFlow id="_22" sourceRef="_18" targetRef="_8"/>

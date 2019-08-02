@@ -1,11 +1,5 @@
 package com.lyyang.activitistudy;
 
-/**
- * @author yyli16
- * @date 2019/7/30
- * @time 9:36
- */
-
 import org.activiti.engine.*;
 import org.activiti.engine.identity.Group;
 import org.activiti.engine.identity.User;
@@ -36,7 +30,7 @@ import static org.junit.Assert.*;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
-public class UserAndGroupTest {
+public class DSLTest {
 
     @Autowired
     private ProcessEngine processEngine;
@@ -58,20 +52,20 @@ public class UserAndGroupTest {
     @Test
     public void contextLoads() {
 
-        //创建用户
-        createUser();
-
-        //创建组
-        createGroup();
-
-        //将用户加入组
-        addUserToGroup();
-
-        queryGroup();
-
-        queryUser();
-
-        //流程部署
+//        //创建用户
+//        createUser();
+//
+//        //创建组
+//        createGroup();
+//
+//        //将用户加入组
+//        addUserToGroup();
+//
+//        queryGroup();
+//
+//        queryUser();
+//
+//        //流程部署
         myDeploy();
 
         //启动流程
@@ -175,7 +169,10 @@ public class UserAndGroupTest {
      */
     private void myDeploy(){
         //部署bpmn文件
-        String bpmnClasspath = "bpmn/flow.bpmn";
+//        String bpmnClasspath = "bpmn/flow5_dsl.bpmn";
+//        String bpmnClasspath = "bpmn/flow6_dsl.bpmn";
+        String bpmnClasspath = "bpmn/flow7_dsl.bpmn";
+
         // 创建部署构建器
         DeploymentBuilder deploymentBuilder = repositoryService.createDeployment();
         // 添加资源
@@ -185,7 +182,10 @@ public class UserAndGroupTest {
 
         // 验证流程定义是否部署成功
         ProcessDefinitionQuery processDefinitionQuery = repositoryService.createProcessDefinitionQuery();
-        List<ProcessDefinition> myProcess = processDefinitionQuery.processDefinitionKey("myProcess_3").list();
+//        List<ProcessDefinition> myProcess = processDefinitionQuery.processDefinitionKey("dsl_process_1").list();
+//        List<ProcessDefinition> myProcess = processDefinitionQuery.processDefinitionKey("dsl_process_2").list();
+        List<ProcessDefinition> myProcess = processDefinitionQuery.processDefinitionKey("dsl_process_3").list();
+
         System.out.println("process count: " + myProcess.size());
 //        assertEquals(1, count);
     }
@@ -196,21 +196,39 @@ public class UserAndGroupTest {
      */
     private void userTaskManagement(){
 
-        ProcessInstance processInstance = runtimeService.startProcessInstanceByKey("myProcess_3");
+//        ProcessInstance processInstance = runtimeService.startProcessInstanceByKey("dsl_process_1");
+//        ProcessInstance processInstance = runtimeService.startProcessInstanceByKey("dsl_process_2");
+        ProcessInstance processInstance = runtimeService.startProcessInstanceByKey("dsl_process_3");
+
         assertNotNull(processInstance);
 
+        List<Task> currTasks;
+        currTasks = taskService.createTaskQuery().processInstanceId(processInstance.getId()).list();
+
         //billie作为候选人的任务
-        Task billieTask = taskService.createTaskQuery().taskCandidateUser("billie").executionId(processInstance.getId()).singleResult();
-        Task jackchenTask = taskService.createTaskQuery().taskCandidateUser("jackchen").executionId(processInstance.getId()).singleResult();
-//        System.out.println("test");
-        assertNotNull(billieTask);
+        List<Task> billieTask = taskService.createTaskQuery().processInstanceId(processInstance.getId()).taskCandidateUser("billie").list();
+        List<Task> jackchenTask = taskService.createTaskQuery().processInstanceId(processInstance.getId()).taskCandidateUser("jackchen").list();
+
         //签收任务
-        taskService.claim(billieTask.getId(), "billie");
+        taskService.claim(billieTask.get(0).getId(), "billie");
+
         //billie签收任务后，jackchen无法签收任务
-        jackchenTask = taskService.createTaskQuery().taskCandidateUser("jackchen").singleResult();
+        jackchenTask = taskService.createTaskQuery().processInstanceId(processInstance.getId()).taskCandidateUser("jackchen").list();
+
+        //查询当前所有tasks
+        currTasks = taskService.createTaskQuery().processInstanceId(processInstance.getId()).list();
 
         //处理任务
-        taskService.complete(billieTask.getId());
+        taskService.complete(billieTask.get(0).getId());
+
+        jackchenTask = taskService.createTaskQuery().processInstanceId(processInstance.getId()).taskCandidateUser("jackchen").list();
+        currTasks = taskService.createTaskQuery().processInstanceId(processInstance.getId()).list();
+
+        taskService.claim(jackchenTask.get(0).getId(), "jackchen");
+        taskService.complete(jackchenTask.get(0).getId());
+
+        currTasks = taskService.createTaskQuery().processInstanceId(processInstance.getId()).list();
+
     }
 }
 
